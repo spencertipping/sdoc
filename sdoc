@@ -3,12 +3,14 @@
 # Licensed under the terms of the MIT source code license
 
 my @args = ();
-push @args, shift @ARGV until $ARGV[0] eq '--' or not @ARGV;
+push @args, shift @ARGV until /^--/ !~ $ARGV[0] or $ARGV[0] eq '--' or not @ARGV;
 
-(my ($tags)       = grep s/^--tags=//,                @args) ||= ('tags');
-(my ($comment)    = grep s/^--comment=//,             @args) ||= (undef);
- my  $source_only = grep /^--source-only$/ || /^-s$/, @args;
- my  $html_only   = grep /^--html-only$/   || /^-h$/, @args;
+my ($tags)       = grep s/^--tags=//,                @args;
+my ($comment)    = grep s/^--comment=//,             @args;
+my  $source_only = grep /^--source-only$/ || /^-s$/, @args;
+my  $html_only   = grep /^--html-only$/   || /^-h$/, @args;
+
+$tags ||= 'tags';
 
 my %comments_for_extension = 
   qw|c     /*,*/  cpp   //   cc   //   h    //   java //  py  #    rb   #    pl  #   pm   #         ml   (*,*)  js  //
@@ -22,11 +24,11 @@ my $html_script      = 'http://spencertipping.com/sdoc/sdoc.js';
 
 sub is_code    {map /^\s*[^A-Z\|\s]/o, @_}
 sub is_blank   {map /^\n/o, @_}
-sub comment    {my ($text, $s, $e) = @_; join "\n", map "$s $_$e", split /\n/, $text}
+sub comment    {my ($text, $s, $e) = @_; join "\n", map("$s $_$e", split /\n/, $text)}
 sub escape     {my ($text) = @_; $text =~ s/&/&amp;/go; $text =~ s/</&lt;/go; $text =~ s/>/&gt;/go; $text}
 
-sub paragraphs {map split /(\n{2,})/, @_}
-sub read_file  {open my $fh, '<', $_[0]; my $result = join <$fh>; close $fh; $result}
+sub paragraphs {map split(/(\n{2,})/, $_), @_}
+sub read_file  {open my $fh, '<', $_[0]; my $result = join '', <$fh>; close $fh; $result}
 sub write_file {open my $fh, '>', $_[0]; print $fh $_[1]; close $fh}
 
 sub generate_source {
@@ -45,7 +47,7 @@ sub generate_html {
   my ($extension) = $original =~ /^.*\.(\w+)$/igo;
   (my $new_file = $filename)  =~ s/\.sd$/\.html/io;
 
-  my @pieces = map escape $_, paragraphs read_file $filename;
+  my @pieces = map escape($_), paragraphs read_file $filename;
   my %file_counts;
   my $count;
 
@@ -53,10 +55,11 @@ sub generate_html {
   my %targets;
 
   for (grep /^(\S+)\t\s*([^\t]+)\t\s*\/(.*)\//o, split /\n/, read_file $tags) {
-    $links{++$count} = $targets{++$file_counts{$file}} = [my ($identifier, $file, $pattern) = map escape $_, $1, $2, $3];
+    my @line = my ($identifier, $file, $pattern) = map escape($_), $1, $2, $3;
+    $links{++$count} = $targets{++$file_counts{$file}} = [@line];
 
-    is_code($_) && s/($pattern)/\1<a class="target" id="target-$file_counts{$file}"><\/a>/mg for @pieces;
-    s/($identifier)/\1<a class="link" id="link-$count"><\/a>/mg for @pieces;
+    grep is_code($_) && s/($pattern)/$1<a class="target" id="target-$file_counts{$file}"><\/a>/mg, @pieces;
+    grep s/($identifier)/$1<a class="link" id="link-$count"><\/a>/mg, @pieces;
   }
 
   my $processed_source = join '', @pieces;
@@ -76,8 +79,8 @@ sub generate_html {
 }
 
 my @files = @ARGV ? @ARGV : <*.sd>;
-map generate_source $_, @files unless $html_only;
-map generate_html   $_, @files unless $source_only;
+map generate_source($_), @files unless $html_only;
+map generate_html  ($_), @files unless $source_only;
 
 __END__
 

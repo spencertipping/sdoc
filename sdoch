@@ -11,11 +11,10 @@ my ($tags) = grep s/^--tags=//o, @args;
 my ($script) = grep s/^--js=//o, @args;
 
 $tags   ||= 'tags';
-$script ||= $ENV{SDOC_JS_FILE} || 'http://spencertipping.com/sdoc/lib/sdoc.js';
+$script ||= $ENV{SDOC_JS} || 'http://spencertipping.com/sdoc/lib/sdoc.js';
 
 sub is_code    {map /^\s*[^A-Z\|\s]/o, @_}
 sub is_blank   {map /^\n/o, @_}
-sub comment    {my ($text, $s, $e) = @_; join "\n", map("$s $_$e", split /\n/, $text)}
 sub escape     {my ($text) = @_; $text =~ s/&/&amp;/go; $text =~ s/</&lt;/go; $text =~ s/>/&gt;/go; $text}
 
 sub paragraphs {map split(/(\n{2,})/, $_), @_}
@@ -59,9 +58,7 @@ sub generate_html {
                            </html>};
 }
 
-my @files = @ARGV ? @ARGV : <*.sdoc>;
-map generate_source($_), @files unless $html_only;
-map generate_html  ($_), @files unless $source_only;
+map generate_html ($_), @ARGV ? @ARGV : <*.sdoc>;
 
 __END__
 

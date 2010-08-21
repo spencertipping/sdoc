@@ -1,0 +1,8 @@
+SDoc test.
+Identifiers in the comment regions are marked by bounding slashes; e.g. /test/ for the below class.
+
+public class test {
+  public static void main (final String[] args) {
+    System.out.println ("It works");
+  }
+}

@@ -1,0 +1,16 @@
+This is an SDoc file.
+
+typedef int Foo;
+
+Here is a documentation paragraph forced as code:
+
+c
+Foo f = 10;
+
+And here is some code forced as documentation:
+
+| int main () {...}
+
+int main () {
+  return f;
+}

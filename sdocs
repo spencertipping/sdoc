@@ -32,10 +32,11 @@ sub generate_source {
   my ($start, $end) = split /,/o, $comment || $comments_for_extension{lc $extension};
 
   warn "Not clobbering $new_file" and return if -f $new_file && ! read_file($new_file) =~ /\s$generated_string\s/;
-  write_file $new_file, join '', map(is_code($_) || is_blank($_) ? $_ : comment($_, $start, $end), paragraphs read_file $filename), "\n$start $generated_string $end";
+  write_file $new_file, join '', map(is_code($_) || is_blank($_) ? ($_ =~ /^\s*c\n(.*)$/so ? $1 : $_) : comment($_, $start, $end), paragraphs read_file $filename),
+                                 "\n$start $generated_string $end";
 }
 
-map generate_source($_), @ARGV ? @ARGV : <*.sd>;
+map generate_source($_), @ARGV ? map(-d($_) ? <$_/*.sd> : $_, @ARGV) : <*.sd>;
 
 __END__
 
@@ -51,6 +52,8 @@ sdocs [--comments=x,y] [file1 [file2 [... fileN]]]
 
 SDoc is a system that makes documentation easier and produces cross-referenced HTML files from your source code. There are two pieces, sdoch and sdocs. sdoch converts SDoc-format source code
 into usable source (i.e. it comments out documentation), and sdoch produces HTML from the source and an Exuberant CTags file.
+
+Both sdocs and sdoch are designed to be used with no options for most cases. Without options or files, each will process all C<.sd> files in the current directory.
 
 =head1 OPTIONS
 
@@ -70,7 +73,32 @@ The SDoc file format is, well, very simple. sdocs and sdoch first split the file
 categorize them: documentation paragraphs begin with a capital letter or pipe symbol (|), and code paragraphs begin with anything else. Documentation paragraphs are commented out, and source
 paragraphs are left alone. (In the HTML output, code paragraphs are escaped and put into C<< <pre> >> tags while documentation paragraphs are rendered verbatim.)
 
-So, for example, this is a valid SDoc file:
+You can override paragraphs' categorizations. For example, sdocs will infer this paragraph as documentation, since it starts with a capital letter:
+
+    String.prototype.trim = function () {
+      return this.replace (/^\s*/, '').replace (/\s*$/, '');
+    };
+
+To force it to be interpreted as code, you can mark it like this:
+
+    c
+    String.prototype.trim = function () {
+      return this.replace (/^\s*/, '').replace (/\s*$/, '');
+    };
+
+Similarly, when you are including code samples in your documentation, such as:
+
+    This code snippet does something interesting:
+
+      let foo x = foo x + 1
+
+you can force documentation by using this notation:
+
+    This code snippet does something interesting:
+
+    | let foo x = foo x + 1
+
+Here is what a valid SDoc file looks like:
 
     Header material -- this is all comments.
     This program does something really spiffy. Check out the /main/ method:

@@ -2,11 +2,12 @@
 # SDoc documentation generator | Spencer Tipping
 # Licensed under the terms of the MIT source code license
 
+++$|;
+
 my @args = ();
 push @args, shift @ARGV until /^--/ !~ $ARGV[0] or $ARGV[0] eq '--' or not @ARGV;
 
 my ($tags)       = grep s/^--tags=//,                @args;
-my ($comment)    = grep s/^--comment=//,             @args;
 my  $source_only = grep /^--source-only$/ || /^-s$/, @args;
 my  $html_only   = grep /^--html-only$/   || /^-h$/, @args;
 
@@ -55,7 +56,7 @@ sub generate_html {
   my %targets;
 
   for (grep /^(\S+)\t\s*([^\t]+)\t\s*\/(.*)\//o, split /\n/, read_file $tags) {
-    my @line = my ($identifier, $file, $pattern) = map escape($_), $1, $2, $3;
+    print my @line = my ($identifier, $file, $pattern) = map escape($_), $1, $2, $3;
     $links{++$count} = $targets{++$file_counts{$file}} = [@line];
 
     grep is_code($_) && s/($pattern)/$1<a class="target" id="target-$file_counts{$file}"><\/a>/mg, @pieces;

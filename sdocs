@@ -50,10 +50,11 @@ sdocs [--comments=x,y] [file1 [file2 [... fileN]]]
 
 =head1 DESCRIPTION
 
-SDoc is a system that makes documentation easier and produces cross-referenced HTML files from your source code. There are two pieces, sdoch and sdocs. sdoch converts SDoc-format source code
-into usable source (i.e. it comments out documentation), and sdoch produces HTML from the source and an Exuberant CTags file.
+SDoc is a system that makes documentation easier and produces cross-referenced HTML files from your source code. There are two pieces, sdoch and sdocs. sdocs converts SDoc-format source code
+into usable source (i.e. it comments out documentation), and L<sdoch(1)> produces HTML from the source and an Exuberant CTags file. The file produced by sdocs is write-protected as a reminder
+that edits should go in the C<.sdoc> file instead.
 
-Both sdocs and sdoch are designed to be used with no options for most cases. Without options or files, each will process all C<.sdoc> files in the current directory.
+Both sdocs and sdoch are designed to be used with no options most of the time. Without options or arguments, each will process all C<.sdoc> files in the current directory.
 
 =head1 OPTIONS
 

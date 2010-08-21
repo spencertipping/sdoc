@@ -1,6 +1,6 @@
 " Language:    SDoc
 " Maintainer:  Spencer Tipping <spencer@spencertipping.com>
-" URL:         http://spencertipping.com/sdoc/sdoc.vim
+" URL:         http://spencertipping.com/sdoc/vim/plugin/sdoc.vim
 " Project URL: http://github.com/spencertipping/sdoc
 
 " The idea is that we look at the original filename, trim the '.sd' from the end, and then rerun the filetype detection to pick up the syntax. At the end, we create a custom syntax region to

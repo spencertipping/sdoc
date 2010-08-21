@@ -1,0 +1,4 @@
+You can drop sdoc.vim into your ~/.vim/plugin directory to enable it on any filetype.
+Just add the extension '.sdoc' to whatever it was before (so test.c would become
+test.c.sdoc, for instance), and vim will choose the correct base highlighter and add
+the SDoc formatting into it.

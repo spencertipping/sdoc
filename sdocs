@@ -23,12 +23,12 @@ sub escape     {my ($text) = @_; $text =~ s/&/&amp;/go; $text =~ s/</&lt;/go; $t
 
 sub paragraphs {map split(/(\n{2,})/, $_), @_}
 sub read_file  {open my $fh, '<', $_[0]; my $result = join '', <$fh>; close $fh; $result}
-sub write_file {open my $fh, '>', $_[0]; print $fh $_[1]; close $fh}
+sub write_file {chmod 0644, $_[0]; open my $fh, '>', $_[0]; print $fh $_[1]; close $fh; chmod 0444, $_[0]}
 
 sub generate_source {
   my ($filename)    = @_;
-  my ($extension)   = $filename =~ /\.(\w+)\.sd$/igo;
-  my ($new_file)    = $filename =~ /^(.*)\.sd$/igo;
+  my ($extension)   = $filename =~ /\.(\w+)\.sdoc$/igo;
+  my ($new_file)    = $filename =~ /^(.*)\.sdoc$/igo;
   my ($start, $end) = split /,/o, $comment || $comments_for_extension{lc $extension};
 
   warn "Not clobbering $new_file" and return if -f $new_file && ! read_file($new_file) =~ /\s$generated_string\s/;
@@ -36,7 +36,7 @@ sub generate_source {
                                  "\n$start $generated_string $end";
 }
 
-map generate_source($_), @ARGV ? map(-d($_) ? <$_/*.sd> : $_, @ARGV) : <*.sd>;
+map generate_source($_), @ARGV ? map(-d($_) ? <$_/*.sdoc> : $_, @ARGV) : <*.sdoc>;
 
 __END__
 
@@ -53,7 +53,7 @@ sdocs [--comments=x,y] [file1 [file2 [... fileN]]]
 SDoc is a system that makes documentation easier and produces cross-referenced HTML files from your source code. There are two pieces, sdoch and sdocs. sdoch converts SDoc-format source code
 into usable source (i.e. it comments out documentation), and sdoch produces HTML from the source and an Exuberant CTags file.
 
-Both sdocs and sdoch are designed to be used with no options for most cases. Without options or files, each will process all C<.sd> files in the current directory.
+Both sdocs and sdoch are designed to be used with no options for most cases. Without options or files, each will process all C<.sdoc> files in the current directory.
 
 =head1 OPTIONS
 
@@ -108,7 +108,7 @@ Here is what a valid SDoc file looks like:
       return 0;
     }
 
-If this program is in a file called C<main.c.sd>, then sdocs will generate the following in a file called C<main.c>:
+If this program is in a file called C<main.c.sdoc>, then sdocs will generate the following in a file called C<main.c>:
 
     /* Header material -- this is all comments. */
     /* This program does something really spiffy. Check out the main() method: */

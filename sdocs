@@ -49,11 +49,10 @@ sdocs [--comments=x,y] [file1 [file2 [... fileN]]]
 
 =head1 DESCRIPTION
 
-SDoc is a system that makes documentation easier and produces cross-referenced HTML files from your source code. There are two pieces, sdoch and sdocs. sdocs converts SDoc-format source code
-into usable source (i.e. it comments out documentation), and L<sdoch(1)> produces HTML from the source and an Exuberant CTags file. The file produced by sdocs is write-protected as a reminder
-that edits should go in the C<.sdoc> file instead.
+SDoc is a file format that lets you use comments more transparently than you normally would. sdocs converts SDoc-format source code into usable source (i.e. it comments out documentation). The
+file produced by sdocs is write-protected as a reminder that edits should go in the C<.sdoc> file instead.
 
-Both sdocs and sdoch are designed to be used with no options most of the time. Without options or arguments, each will process all C<.sdoc> files in the current directory.
+sdocs is designed to be used with no options most of the time. Without options or arguments, it will process all C<.sdoc> files in the current directory.
 
 =head1 OPTIONS
 
@@ -69,9 +68,9 @@ defines Perl-style comments. If specified, this style of commenting is used for 
 
 =head1 FILE FORMAT
 
-The SDoc file format is, well, very simple. sdocs and sdoch first split the file into paragraphs, where paragraphs are separated by one or more blank lines. A simple heuristic is then used to
+The SDoc file format is, well, very simple. sdocs first splits the file into paragraphs, where paragraphs are separated by one or more blank lines. A simple heuristic is then used to
 categorize them: documentation paragraphs begin with a capital letter or pipe symbol (|), and code paragraphs begin with anything else. Documentation paragraphs are commented out, and source
-paragraphs are left alone. (In the HTML output, code paragraphs are escaped and put into C<< <pre> >> tags while documentation paragraphs are rendered verbatim.)
+paragraphs are left alone.
 
 You can override paragraphs' categorizations. For example, sdocs will infer this paragraph as documentation, since it starts with a capital letter:
 

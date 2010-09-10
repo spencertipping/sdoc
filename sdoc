@@ -36,7 +36,7 @@ sub generate_source {
   warn "Not clobbering $new_file" and return if -f $new_file && ! read_file($new_file) =~ /\s$generated_string\s/;
   write_file $new_file, join '', map(is_code($_) || is_blank($_) ? ($_ =~ /^\s*c\n(.*)$/so ? $1 : $_) : comment($_, $start, $end), paragraphs read_file $filename),
                                  "\n$start $generated_string $end";
-  chmod 0755, $new_file if read_file($filename) =~ /^#!/mo;
+  chmod 0555, $new_file if read_file($filename) =~ /^#!/mo;
 }
 
 map generate_source($_), @ARGV ? map(-d($_) ? <$_/*.sdoc> : $_, @ARGV) : <*.sdoc>;

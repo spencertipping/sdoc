@@ -1,1 +1,3 @@
-If you run sdocs in this directory, it will produce the source from these examples.
+If you run sdoc in this directory, it will produce the source from these examples.
+You can produce documentation by running sdoch. This will produce an HTML file for
+each source file.

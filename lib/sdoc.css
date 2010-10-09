@@ -5,11 +5,13 @@ body {font-family: 'Droid Sans', sans-serif; font-size: 9pt; width: 900px; margi
 h1, h2, h3, h4, h5, h6 {color: #444; padding-left: 5px; font-family: 'Droid Sans', sans-serif}
 p {margin-left: 5px; text-align: justify; line-height: 1.44em}
 pre {font-family: 'Droid Sans Mono'; letter-spacing: -0.07em; color: #444; font-size: 8pt; border: solid 1px #ccc; border-width: 0 0 0 1px; padding: 4px}
-pre.source {color: black; border-color: #444}
+pre.source {color: black; border-color: #999}
 pre:hover {z-index: 1; border-width: 1px 0 1px 1px; position: relative; width: 400%; left: -250px; background: #eee; padding: 3px 4px}
 section {margin-bottom: 10px}
 
-#toc {width: 190px; font-size: 9pt; color: #ccc}
+li {margin-bottom: 0.44em}
+
+#toc {width: 200px; font-size: 9pt; color: #ccc}
 #toc ul {list-style: square; padding: 0 5px 0 10px; margin: 0; border-right: solid 1px #eee}
 #toc:hover ul {list-style: square; padding: 0 5px 0 10px; margin: 0; border-right: solid 1px #888}
 #toc ul li {padding: 4px 0 0 0; margin: 0; color: #ccc}
@@ -18,4 +20,8 @@ section {margin-bottom: 10px}
 #toc a {color: #ccc; text-decoration: none}
 #toc:hover a {color: #888}
 
-#source {float: right; width: 680px; border-left: solid 1px #ccc; padding-left: 10px}
+#search {position: fixed; top: 0; right: 0; font-size: 14pt}
+#search input {float: right; font-family: 'Droid Sans Mono'; border: solid 1px #ddd; color: #888}
+#search input:focus {border: solid 1px #aaa; background: #eee; color: black}
+
+#source {float: right; width: 689px; border-left: solid 1px #ccc; padding-left: 5px}

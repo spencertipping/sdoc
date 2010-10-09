@@ -28,6 +28,8 @@ sub paragraphs {map split(/(\n{2,})/, $_), @_}
 sub read_file  {open my $fh, '<', $_[0]; my $result = join '', <$fh>; close $fh; $result}
 sub write_file {chmod 0644, $_[0]; open my $fh, '>', $_[0]; print $fh $_[1]; close $fh; chmod 0444, $_[0]}
 
+sub escape     {my @results = map {s/\\/\\\\/go; s/\n/\\n/go; s/'/\\'/go; $_} @_; wantarray ? @results : $results[0]}
+
 sub generate_source {
   my ($filename)    = @_;
   my ($extension)   = $filename =~ /\.(\w+)\.sdoc$/igo;
@@ -40,13 +42,11 @@ sub generate_source {
   chmod 0555, $new_file if read_file($filename) =~ /^#!/mo;
 
   if ($sdocp) {
-    # Generate an SDocP file, which is similar to JSONP but the callback is a string of SDoc.
+    # Generate an SDocP file, which is similar to JSONP but the callback takes a string of SDoc.
     # SDocP always uses the 'sdocp()' callback.
-    my $contents = read_file $filename;
-    $contents =~ s/\\/\\\\/go;
-    $contents =~ s/\n/\\n/go;
-    $contents =~ s/'/\\'/go;
-    write_file "${filename}p", "sdocp('$contents');";
+    my $contents         = escape read_file $filename;
+    my $escaped_filename = escape $filename;
+    write_file "${filename}p", "sdocp('$escaped_filename', '$contents');";
   }
 }
 

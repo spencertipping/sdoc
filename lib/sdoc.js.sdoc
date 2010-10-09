@@ -21,6 +21,8 @@ HTML driver is designed to solve (2). There are several things it does to help:
   body to the files provided in the sdocp callbacks. Once we have each file we can start parsing, sectioning, and building indexes. (And if after some time we don't have all of the files then
   we can display a warning to the user.)
 
+    var map = caterwaul.util.map,
+
 Logical processing.
 The first step is to process the SDoc files into a logical structure. This is then used to build the UI and search interface.
 
@@ -29,7 +31,7 @@ The first step is to process the SDoc files into a logical structure. This is th
   be using later on (see 'Sectioning'), we need to preserve any whitespace preceding the paragraph's first line. The format ends up being an array of snippets, where each snippet is an object of
   the form {text: '...', role: 'comment' | 'source'}.
 
-    var parse_sdoc = fn[sdoc][caterwaul.util.map(fn[s][{text: s, role: /^\s*[A-Z]/.test(s) ? 'comment' : /^\s*\|/.test(s) ? 'pipe' : 'source'}], sdoc.split(/\n\n+/))],
+        parse_sdoc = fn[sdoc][caterwaul.util.map(fn[s][{text: s, role: /^\s*[A-Z]/.test(s) ? 'comment' : /^\s*\|/.test(s) ? 'pipe' : 'source'}], sdoc.split(/\n\n+/))],
 
   Sectioning.
   Next we need to determine the sections in a document. Informally, sections are 'short lines that start paragraphs and end in a dot'. For example, the 'Sectioning' line at the top of this
@@ -63,9 +65,12 @@ The first step is to process the SDoc files into a logical structure. This is th
   'pre', and the text loses its pipe symbol.
 
          mark_pipe = fn[s][s.role === 'pipe' && (number ? (s.role = 'enumerate', s.start = Number(number[1]), s.items = [],
-                                                           s.text.replace(/(\n|^)\s*(\d{1,2})\.\s{1,2}([A-Za-z](?:.|\n\s*[^0-9])*)/g, fn[_, ds, t][s.items.push(t), _])) :
+                                                           s.text.replace(/\.\s{1,2}([A-Za-z](?:.|\n\s*[^\s0-9])*)/g, fn[_, t][s.items.push(t), _])) :
                                                           (s.role = 'pre', s.text = s.text.replace(/^(\s*)\|/, '$1 ')),
                                                  where[number = /^\s*\|?\s*(\d{1,2})\.\s{1,2}[A-Za-z]/.exec(s.text)])],
+
+  Source trimming.
+  Source code should be outdented to make optimal use of screen space.
 
   Indexing.
   This is cool. We go through each snippet and construct an index of every word and word pair, optionally separated by up to three words in between. These indexes are mapped into a hashtable
@@ -96,18 +101,21 @@ Rendering.
 Once files have been broken down into hierarchical sections, we can render them as HTML. This is fairly straightforward; most of the markup is derived directly from the structure of the
 snippets. Later on I'll put in some code to actually process the text and insert semantic markup there.
 
-        html_escape = fn[s][s.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;')],
-     render_snippet = fn[s][s.section ? '<section><h#{s.level + 1}>#{html_escape(s.section)}</h#{s.level + 1}>' +
-                                                 '<p>#{html_escape(s.text)}</p>#{map(render_snippet, s.subsnippets || []).join("\n")}</section>' :
+        html_escape = fn[s][s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')],
+         render_toc = fn[s][s.section ? '<li><a href="##{s.section}">#{s.section}</a>\n<ul>#{map(render_toc, s.subsnippets || []).join("")}</ul></li>' : '',
+                            where[map = caterwaul.util.map]],
+
+     render_snippet = fn[s][s.section ? '<section id="#{s.section}"><h#{s.level + 1}>#{html_escape(s.section)}</h#{s.level + 1}>' +
+                                                                   '<div><p>#{html_escape(s.text)}</p>#{map(render_snippet, s.subsnippets || []).join("")}</div></section>' :
                      s.role === 'pre' ? '<pre>#{html_escape(s.text)}</pre>' :
                   s.role === 'source' ? '<pre class="source">#{html_escape(s.text)}</pre>' :
-               s.role === 'enumerate' ? '<ol start="#{s.start}">#{map(fn[s]["<li>" + html_escape(s) + "</li>"], s.items)}</ol>' :
+               s.role === 'enumerate' ? '<ol start="#{s.start}">#{map(fn[s]["<li>" + html_escape(s) + "</li>"], s.items).join("")}</ol>' :
                                         '<p>#{html_escape(s.text)}</p>', where[map = caterwaul.util.map]],
-           expected = null,
              loaded = {},
 
-             render = function () {for (var k in loaded) $('body').append(render_snippet(process_file(k, loaded[k])))},
-       check_loaded = function () {for (var i = 0, l = expected.length, all = true; i < l; ++i) all &= ! (expected[i] in loaded); return all};
+             render = fn[filename, source][let[parsed = loaded[filename] = process_file(filename, source)] in $(fn_[$('#source').append(render_snippet(parsed)),
+                                                                                                                    $('#toc > ul').append(render_toc(parsed))])];
 
-  return fn[filename, sdoc][expected || (expected = $('body > script[src$=".sdocp"]').map(fn_[$(this).attr('src').replace(/p$/, '')])),
-                            loaded[filename] = sdoc, check_loaded() && render()]})();
+  $(fn_[$('body').append('<div id="source"></div><div id="toc"><ul></ul></div>')]);
+
+  return render})();

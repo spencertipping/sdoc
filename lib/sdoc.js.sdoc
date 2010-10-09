@@ -1,0 +1,34 @@
+SDoc JavaScript driver | Spencer Tipping
+Licensed under the terms of the MIT source code license
+
+Introduction.
+This driver file governs the process of rendering SDoc source as HTML. The mechanism to achieve this is fairly simple: First, the user downloads the sdoc.html file from this directory (hosted
+at http://spencertipping.com/sdoc/sdoc.html). Inside the HTML file is a comment indicating how to add source files. For example, the HTML document might look like this:
+
+| <!DOCTYPE html>
+  <html>
+    <head><script src='http://...'>...</head>
+    <body>
+      <!-- Insert source code references here, for example: -->
+      <!-- <script type='text/sdoc' src='foo/bar.sdoc'></script> -->
+    </body>
+  </html>
+
+A complete HTML page, then, would have <script> tags, one for each SDoc source file:
+
+| <body>
+    <script type='text/sdoc' src='sdoc.js.sdoc'></script>
+  </body>
+
+When the page loads a couple of things happen. First, an AJAX call is made to load in each file. (This is subject to cross-domain issues, so be sure that your project is all hosted in one
+place.) Once the contents are loaded, the files are parsed into paragraphs and sections, cross-referenced, indexed, and the page UI is built.
+
+$(caterwaul.clone('std')(function () {
+
+Script loading.
+Each <script> of type 'text/sdoc' in the body should be loaded. Once we have them all we can proceed to parse and build indexes. For future expansion, anything that begins with 'text/sdoc' is
+accepted as a script type; for example 'text/sdoc-js' would be fine. (Right now nothing special is done with that information.)
+
+$('script[type^="text/sdoc"][src]').each(fn_[$.get($(this).attr('src'), fn[data][$('body').append(data)])]);
+
+}));

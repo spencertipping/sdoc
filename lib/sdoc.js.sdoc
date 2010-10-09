@@ -124,6 +124,7 @@ snippets. Later on I'll put in some code to actually process the text and insert
                                             fn_[let[v = $(this).val()] in (
                                                 timeout && clearTimeout(timeout),
                                                 timeout = setTimeout(fn_[v.length ? $('.snippet').each(fn_[$(this).data('snippet').index[v] ? $(this).show() : $(this).hide()]) :
-                                                                                    $('.snippet').show()], 100))])))]);
+                                                                                    $('.snippet').show()], 100))]))),
+        $('#search input').focus()]);
 
   return render})();

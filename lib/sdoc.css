@@ -2,7 +2,7 @@
 @import url(http://fonts.googleapis.com/css?family=Droid%20Sans%20Mono&subset=latin);
 
 body {font-family: 'Droid Sans', sans-serif; font-size: 9pt; width: 900px; margin-left: auto; margin-right: auto}
-h1, h2, h3, h4, h5, h6 {color: #444; padding-left: 5px; font-family: 'Droid Sans', sans-serif}
+h1, h2, h3, h4, h5, h6 {color: black; padding-left: 5px; font-family: 'Droid Sans', sans-serif}
 p {margin-left: 5px; text-align: justify; line-height: 1.44em}
 pre {font-family: 'Droid Sans Mono'; letter-spacing: -0.07em; color: #444; font-size: 8pt; border: solid 1px #ccc; border-width: 0 0 0 1px; padding: 4px}
 pre.source {color: black; border-color: #999}
@@ -20,8 +20,8 @@ li {margin-bottom: 0.44em}
 #toc a {color: #ccc; text-decoration: none}
 #toc:hover a {color: #888}
 
-#search {position: fixed; top: 0; right: 0; font-size: 14pt}
-#search input {float: right; font-family: 'Droid Sans Mono'; border: solid 1px #ddd; color: #888}
+#search {position: fixed; top: 0; right: 0}
+#search input {float: right; font-family: 'Droid Sans Mono'; font-size: 14pt; border: solid 1px #ddd; color: #888}
 #search input:focus {border: solid 1px #aaa; background: #eee; color: black}
 
 #source {float: right; width: 689px; border-left: solid 1px #ccc; padding-left: 5px}

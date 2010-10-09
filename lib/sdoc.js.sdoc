@@ -72,6 +72,10 @@ The first step is to process the SDoc files into a logical structure. This is th
   Source trimming.
   Source code should be outdented to make optimal use of screen space.
 
+           outdent = function (s) {for (var i = 0, xs = s.split(/\n+/), l = xs.length, x, min = s.replace(/./g, ' '); (x = xs[i] && /^(\s*)[^\s]/.exec(xs[i])) && (x = x[1]), i < l; ++i)
+                                     min = x.length < min.length ? x : min;
+                                   return s.replace(new RegExp('(^|\\n)#{min}', 'g'), '$1')},
+
   Indexing.
   This is cool. We go through each snippet and construct an index of every word and word pair, optionally separated by up to three words in between. These indexes are mapped into a hashtable
   from words to the 'relevance' of that pattern, where relevance is summed over matches, and each match's relevance is 1 over the number of words in between plus 1. So, for example, the text
@@ -107,8 +111,8 @@ snippets. Later on I'll put in some code to actually process the text and insert
 
      render_snippet = fn[s][s.section ? '<section id="#{s.section}"><h#{s.level + 1}>#{html_escape(s.section)}</h#{s.level + 1}>' +
                                                                    '<div><p>#{html_escape(s.text)}</p>#{map(render_snippet, s.subsnippets || []).join("")}</div></section>' :
-                     s.role === 'pre' ? '<pre>#{html_escape(s.text)}</pre>' :
-                  s.role === 'source' ? '<pre class="source">#{html_escape(s.text)}</pre>' :
+                     s.role === 'pre' ? '<pre>#{outdent(html_escape(s.text))}</pre>' :
+                  s.role === 'source' ? '<pre class="source">#{outdent(html_escape(s.text))}</pre>' :
                s.role === 'enumerate' ? '<ol start="#{s.start}">#{map(fn[s]["<li>" + html_escape(s) + "</li>"], s.items).join("")}</ol>' :
                                         '<p>#{html_escape(s.text)}</p>', where[map = caterwaul.util.map]],
              loaded = {},

@@ -3,10 +3,10 @@
 # Licensed under the terms of the MIT source code license
 
 my @args = ();
-push @args, shift @ARGV until /^-/ !~ $ARGV[0] or $ARGV[0] eq '--' or not @ARGV;
+push @args, shift @ARGV until $ARGV[0] !~ /^-/ or $ARGV[0] eq '--' or not @ARGV;
 
 my ($comment) = grep s/^--comment=//, @args;
-my ($sdocp)   = grep /^--sdocp$/ || /^-p$/, @args;
+my  $sdocp    = grep /^--sdocp$/ || /^-p$/, @args;
 
 my %comments_for_extension = 
   qw|c     /*,*/  cpp   //   cc   //   h    //   java //  py  #    rb   #    pl  #   pm   #         ml   (*,*)  js  //
@@ -32,7 +32,6 @@ sub generate_source {
   my ($filename)    = @_;
   my ($extension)   = $filename =~ /\.(\w+)\.sdoc$/igo;
   my ($new_file)    = $filename =~ /^(.*)\.sdoc$/igo;
-  my ($sdocp_file)  = "${filename}p";
   my ($start, $end) = split /,/o, $comment || $comments_for_extension{lc $extension};
 
   warn "Not clobbering $new_file" and return if -f $new_file && (! read_file($new_file) =~ /\s$generated_string\s/ || -w $new_file);
@@ -47,7 +46,7 @@ sub generate_source {
     $contents =~ s/\\/\\\\/go;
     $contents =~ s/\n/\\n/go;
     $contents =~ s/'/\\'/go;
-    write_file $sdocp_file, "sdocp(\"$contents\");";
+    write_file "${filename}p", "sdocp('$contents');";
   }
 }
 
@@ -61,7 +60,7 @@ sdoc - Simple documentation - source unpacker
 
 =head1 SYNOPSYS
 
-sdoc [--comments=x,y] [file1 [file2 [... fileN]]]
+sdoc [--comments=x,y] [-p|--sdocp] [file1 [file2 [... fileN]]]
 
 =head1 DESCRIPTION
 
@@ -79,6 +78,14 @@ sdoc is designed to be used with no options most of the time. Without options or
 Sets the comment delimiters. Normally these are detected from the file's extension, but they can be set explicitly. All generated comments are line comments; that is, multiline block
 comments are never used. To define line comments, leave the second field blank (the comma can also be omitted); for example, C<--comment=//> will define C++-style comments, and C<--comment=#>
 defines Perl-style comments. If specified, this style of commenting is used for all files regardless of their extensions.
+
+=back
+
+=over 2
+
+=item B<-p, --sdocp>
+
+Generates C<.sdocp> files. These are used for HTML documentation (see C<sdoc.html> for more information).
 
 =back
 

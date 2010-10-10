@@ -21,7 +21,7 @@ li {margin-bottom: 0.44em}
 #toc:hover a {color: #888}
 
 #search {position: fixed; top: 0; right: 0}
-#search input {float: right; font-family: 'Droid Sans Mono'; font-size: 14pt; border: solid 1px #ddd; border-width: 0 0 0 1px; color: #888}
-#search input:focus {border: none; color: black}
+#search input {float: right; background: transparent; font-family: 'Droid Sans Mono'; font-size: 14pt; border: solid 1px #ddd; border-width: 0 0 0 1px; color: #888}
+#search input:focus {border: none; color: black; background: white}
 
 #source {float: right; width: 695px; border-left: solid 1px #ccc; padding-left: 2px}

@@ -100,9 +100,9 @@ The first step is to process the SDoc files into a logical structure. This is th
   from words to the 'relevance' of that pattern, where relevance is summed over matches, and each match's relevance is 1 over the number of words in between plus 1. So, for example, the text
   'foo bar bif baz' matched on the term 'foo bif' has relevance 0.5.
 
-             index = function (s) {var ws = s.text.split(/[^-\w]+/), x = s.index = {}; for (var i = 0, l = ws.length; i < l; ++i)
-                                                                                        {x[ws[i]] = (x[ws[i]] || 0) + 1;
-                                                                                         for (var j = i + 1, w; w = '#{ws[i]}:#{ws[j]}', j < i + 10 && j < l; ++j) x[w] = (x[w] || 0) + 1 / (j - i)}},
+             index = function (s) {var ws = ((s.section || '') + s.text).split(/[^-\w]+/), x = s.index = {};
+                                   for (var i = 0, l = ws.length; i < l; ++i) {x[ws[i]] = (x[ws[i]] || 0) + 1;
+                                                                               for (var j = i + 1, w; w = '#{ws[i]}:#{ws[j]}', j < i + 10 && j < l; ++j) x[w] = (x[w] || 0) + 1 / (j - i)}},
 
   Hierarchical sectioning.
   Sub-sectioning is done by assigning a 'subsnippets' array to each snippet with children. The first paragraph of any section is treated kind of specially; it isn't moved into a subsnippet
@@ -152,6 +152,6 @@ snippets. Later on I'll put in some code to actually process the text and insert
                                                                                   $('.snippet').appear()], 100))]))),
         $('#search input').focus()]);
 
-  $.fn.snippet = fn[s][s ? this.data('snippet', s).addClass('snippet') : this.data('snippet')];
+  $.fn.snippet = fn[s][s ? this.data('snippet', s).addClass('snippet').addClass('role-#{s.role}') : this.data('snippet')];
 
   return render})();

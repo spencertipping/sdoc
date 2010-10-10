@@ -2,18 +2,18 @@
 @import url(http://fonts.googleapis.com/css?family=Droid%20Sans%20Mono&subset=latin);
 
 body {font-family: 'Droid Sans', sans-serif; font-size: 9pt; width: 900px; margin-left: auto; margin-right: auto}
-h1, h2, h3, h4, h5, h6 {color: black; padding-left: 5px; font-family: 'Droid Sans', sans-serif}
-p {margin-left: 5px; text-align: justify; line-height: 1.44em}
-pre {font-family: 'Droid Sans Mono'; letter-spacing: -0.07em; color: #444; font-size: 8pt; border: solid 1px #ccc; border-width: 0 0 0 1px; padding: 4px}
+h1, h2, h3, h4, h5, h6 {color: black; padding-left: 10px; font-family: 'Droid Sans', sans-serif}
+p {margin-left: 10px; text-align: justify; line-height: 1.44em}
+pre {font-family: 'Droid Sans Mono'; letter-spacing: -0.07em; color: #444; font-size: 8pt; border: solid 1px #ccc; border-width: 0 0 0 1px; padding: 4px 0 4px 9px}
 pre.source {color: black; border-color: #999}
-pre:hover {z-index: 1; border-width: 1px 0 1px 1px; position: relative; width: 400%; left: -250px; background: #eee; padding: 3px 4px}
+pre:hover {z-index: 1; border-width: 1px 0 1px 1px; position: relative; width: 200%; left: -250px; background: #eee; padding: 3px 0 3px 9px}
 section {margin-bottom: 10px}
 
 li {margin-bottom: 0.44em}
 
 #toc {width: 200px; font-size: 9pt; color: #ccc}
-#toc ul {list-style: square; padding: 0 5px 0 10px; margin: 0; border-right: solid 1px #eee}
-#toc:hover ul {list-style: square; padding: 0 5px 0 10px; margin: 0; border-right: solid 1px #888}
+#toc ul {list-style: square; padding: 0 2px 0 10px; margin: 0; border-right: solid 1px #eee}
+#toc:hover ul {list-style: square; padding: 0 2px 0 10px; margin: 0; border-right: solid 1px #888}
 #toc ul li {padding: 4px 0 0 0; margin: 0; color: #ccc}
 #toc ul li:hover {color: #444}
 #toc ul li:hover > a {color: black}
@@ -21,7 +21,7 @@ li {margin-bottom: 0.44em}
 #toc:hover a {color: #888}
 
 #search {position: fixed; top: 0; right: 0}
-#search input {float: right; font-family: 'Droid Sans Mono'; font-size: 14pt; border: solid 1px #ddd; color: #888}
-#search input:focus {border: solid 1px #aaa; background: #eee; color: black}
+#search input {float: right; font-family: 'Droid Sans Mono'; font-size: 14pt; border: solid 1px #ddd; border-width: 0 0 0 1px; color: #888}
+#search input:focus {border: none; color: black}
 
-#source {float: right; width: 689px; border-left: solid 1px #ccc; padding-left: 5px}
+#source {float: right; width: 695px; border-left: solid 1px #ccc; padding-left: 2px}

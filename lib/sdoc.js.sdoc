@@ -21,7 +21,14 @@ HTML driver is designed to solve (2). There are several things it does to help:
   body to the files provided in the sdocp callbacks. Once we have each file we can start parsing, sectioning, and building indexes. (And if after some time we don't have all of the files then
   we can display a warning to the user.)
 
-    let[original = $.fn.append] in ($.fn.append = fn[xs][xs.constructor === Array ? (map(fn[x][x && t.append(x)], xs), this) : original.call(this, xs), where[t = this]]);
+  JQuery extensions.
+  We need a couple of things. First, jQuery needs to be able to append an array of elements to something, so we pluralize append() below. Next, we need a nice animation to use for showing and
+  hiding things.
+
+    let[original = $.fn.append] in ($.fn.append = fn[xs][xs && xs.constructor === Array ? (map(fn[x][x && t.append(x)], xs), this) : original.call(this, xs), where[t = this]]);
+
+    $.fn.appear    = fn_[this.show()];
+    $.fn.disappear = fn_[this.hide()];
 
     var map = caterwaul.util.map, bind = caterwaul.util.bind,
 
@@ -34,6 +41,16 @@ The first step is to process the SDoc files into a logical structure. This is th
   the form {text: '...', role: 'comment' | 'source'}.
 
         parse_sdoc = fn[sdoc][caterwaul.util.map(fn[s][{text: s, role: /^\s*[A-Z]/.test(s) ? 'comment' : /^\s*\|/.test(s) ? 'pipe' : 'source'}], sdoc.split(/\n\n+/))],
+
+  Module title, author, and prelude.
+  The first paragraph is usually (when I write it, anyway) formatted like this:
+
+  | Module name | Author
+    Licensed under the terms of X license
+
+  It gets formatted specially to reflect this. Its role is 'prelude', and it has the fields 'name', 'author', and 'text' (where 'text' is everything but the first line).
+
+     parse_prelude = fn[s][parts && (s.role = 'prelude', s.name = parts[1], s.author = parts[2], s.text = parts[3] || ''), s, where[parts = /^\s*([^|]+)\|(.*)\n?((?:.|\n)*)/.exec(s.text)]],
 
   Sectioning.
   Next we need to determine the sections in a document. Informally, sections are 'short lines that start paragraphs and end in a dot'. For example, the 'Sectioning' line at the top of this
@@ -79,13 +96,13 @@ The first step is to process the SDoc files into a logical structure. This is th
                                    return s.replace(new RegExp('(^|\\n)#{min}', 'g'), '$1')},
 
   Indexing.
-  This is cool. We go through each snippet and construct an index of every word and word pair, optionally separated by up to three words in between. These indexes are mapped into a hashtable
+  This is cool. We go through each snippet and construct an index of every word and word pair, optionally separated by up to ten words in between. These indexes are mapped into a hashtable
   from words to the 'relevance' of that pattern, where relevance is summed over matches, and each match's relevance is 1 over the number of words in between plus 1. So, for example, the text
   'foo bar bif baz' matched on the term 'foo bif' has relevance 0.5.
 
              index = function (s) {var ws = s.text.split(/[^-\w]+/), x = s.index = {}; for (var i = 0, l = ws.length; i < l; ++i)
                                                                                         {x[ws[i]] = (x[ws[i]] || 0) + 1;
-                                                                                         for (var j = i + 1, w = '#{ws[i]}:#{ws[j]}'; j < i + 4 && j < l; ++j) x[w] = (x[w] || 0) + 1 / (j - i)}},
+                                                                                         for (var j = i + 1, w; w = '#{ws[i]}:#{ws[j]}', j < i + 10 && j < l; ++j) x[w] = (x[w] || 0) + 1 / (j - i)}},
 
   Hierarchical sectioning.
   Sub-sectioning is done by assigning a 'subsnippets' array to each snippet with children. The first paragraph of any section is treated kind of specially; it isn't moved into a subsnippet
@@ -95,36 +112,46 @@ The first step is to process the SDoc files into a logical structure. This is th
                                                                                               fold_subsections(s, ss, fold_subsections(ss[i], ss, i + 1))) :
                                                                 ((s.subsnippets = s.subsnippets || []).push(ss[i]), fold_subsections(s, ss, i + 1)) : i],
 
+  Add indexes.
+  Each parent has its children's indexes merged in with its own, so that it represents its children for searching.
+
+      merge_indexes = function (s) {if (s && s.subsnippets) for (var i = 0, l = s.subsnippets.length, sub; sub = merge_indexes(s.subsnippets[i]), i < l; ++i)
+                                                              for (var k in sub.index) s.index[k] = (s.index[k] || 0) + sub.index[k];
+                                    return s},
+
   File sectioning.
   Each file is broken down into sections. Once we have the contents of each file, we replace its raw text by the hierarchical arrangement of sections. The file's section 'level' is assumed to
   be zero.
 
-       process_file = fn[filename, text][let[snippets = parse_sdoc(text)] in (map(mark_section, snippets), map(mark_pipe, snippets), map(index, snippets),
-                                                                              fold_subsections(result, snippets, 0), result, where[result = {section: filename, index: {}, level: 0, text: ''}])],
+       process_file = fn[filename, text][let[snippets = parse_sdoc(text)] in (parse_prelude(snippets[0]),
+                                                                              map(mark_section, snippets), map(mark_pipe, snippets), map(index, snippets), fold_subsections(result, snippets, 0),
+                                                                              merge_indexes(result), where[result = {section: filename, index: {}, level: 0, text: ''}])],
 
 Rendering.
 Once files have been broken down into hierarchical sections, we can render them as HTML. This is fairly straightforward; most of the markup is derived directly from the structure of the
 snippets. Later on I'll put in some code to actually process the text and insert semantic markup there.
 
-         render_toc = fn[s][s.section && $('<li class="snippet">').data('snippet', s).append(
-                                           $('<a href="##{s.section}">').text(s.section).append($('<ul>').append(map(render_toc, s.subsnippets || []))))],
+         render_toc = fn[s][s.section && $('<li>').snippet(s).append($('<a href="##{s.section}">').text(s.section).append($('<ul>').append(map(render_toc, s.subsnippets || []))))],
 
-     render_snippet = fn[s][s.section ? $('<section class="snippet" id="#{s.section}">').data('snippet', s).append($('<h#{s.level + 1}>').text(s.section)).append(
+     render_snippet = fn[s][s.section ? $('<section id="#{s.section}">').snippet(s).append($('<h#{s.level + 1}>').text(s.section)).append(
                                           $('<div>').append($('<p>').text(s.text)).append(map(render_snippet, s.subsnippets || []))) :
-                     s.role === 'pre' ? $('<pre class="snippet">').data('snippet', s).text(outdent(s.text)) :
-                  s.role === 'source' ? $('<pre class="source snippet">').data('snippet', s).text(outdent(s.text)) :
-               s.role === 'enumerate' ? $('<ol class="snippet" start="#{s.start}">').data('snippet', s).append(map(fn[s][$('<li>').data('snippet', s).text(s)], s.items)) :
-                                        $('<p class="snippet">').data('snippet', s).text(s.text)],
+                     s.role === 'pre' ? $('<pre>').snippet(s).text(outdent(s.text)) :
+                  s.role === 'source' ? $('<pre class="source">').snippet(s).text(outdent(s.text)) :
+                 s.role === 'prelude' ? $('<header>').append($('<h2 class="name">').text(s.name)).append($('<h3 class="author">').append(s.author)).append($('<p class="prelude">').text(s.text)) :
+               s.role === 'enumerate' ? $('<ol start="#{s.start}">').snippet(s).append(map(fn[s][$('<li>').data('snippet', s).text(s)], s.items)) :
+                                        $('<p>').snippet(s).text(s.text)],
 
              render = fn[filename, source][let[parsed = process_file(filename, source)] in $(fn_[$('#source').append(render_snippet(parsed)), $('#toc > ul').append(render_toc(parsed))])];
 
-  $(fn_[$(document).keypress(fn[e][e.which === '/'.charCodeAt(0) ? $('#search input').select().focus() : true]),
+  $(fn_[$(document).keypress(fn[e][document.activeElement !== $('#search input')[0] && e.which === '/'.charCodeAt(0) ? ($('#search input').select().focus(), e.preventDefault()) : true]),
         $('body').append($('<div id="source">')).append($('<div id="toc"><ul>')).append($('<div id="search">').append($('<input>').
-                    bind('keypress change', let[timeout = null] in
-                                            fn_[let[v = $(this).val()] in (
-                                                timeout && clearTimeout(timeout),
-                                                timeout = setTimeout(fn_[v.length ? $('.snippet').each(fn_[$(this).data('snippet').index[v] ? $(this).show() : $(this).hide()]) :
-                                                                                    $('.snippet').show()], 100))]))),
+                    bind('keyup change', let[timeout = null] in
+                                         fn_[let[v = $(this).val().replace(/\s+/g, ':')] in
+                                             (timeout && clearTimeout(timeout),
+                                              timeout = setTimeout(fn_[v.length ? $('.snippet').each(fn_[$(this).snippet().index[v] ? $(this).appear() : $(this).disappear()]) :
+                                                                                  $('.snippet').appear()], 100))]))),
         $('#search input').focus()]);
+
+  $.fn.snippet = fn[s][s ? this.data('snippet', s).addClass('snippet') : this.data('snippet')];
 
   return render})();

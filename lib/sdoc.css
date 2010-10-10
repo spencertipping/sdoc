@@ -25,3 +25,6 @@ li {margin-bottom: 0.44em}
 #search input:focus {border: none; color: black; background: white}
 
 #source {float: right; width: 695px; border-left: solid 1px #ccc; padding-left: 2px}
+#source a.tag {text-decoration: none; color: inherit}
+#source a.tag:hover {color: #35a}
+#source a.highlighted {color: #35a}

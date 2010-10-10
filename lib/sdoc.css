@@ -14,10 +14,11 @@ li {margin-bottom: 0.44em}
 #toc {width: 200px; font-size: 9pt; color: #ccc}
 #toc ul {list-style: square; padding: 0 2px 0 10px; margin: 0; border-right: solid 1px #eee}
 #toc:hover ul {list-style: square; padding: 0 2px 0 10px; margin: 0; border-right: solid 1px #888}
-#toc ul li {padding: 4px 0 0 0; margin: 0; color: #ccc}
-#toc ul li:hover {color: #444}
-#toc ul li:hover > a {color: black}
-#toc a {color: #ccc; text-decoration: none}
+#toc ul a {color: #ccc}
+#toc ul li {padding: 4px 0 0 0; margin: 0}
+#toc ul a:hover {color: black}
+#toc ul a:hover > li {color: black}
+#toc a {color: #888; text-decoration: none}
 #toc:hover a {color: #888}
 
 #search {position: fixed; top: 0; right: 0}

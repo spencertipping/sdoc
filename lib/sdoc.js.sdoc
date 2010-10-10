@@ -125,7 +125,7 @@ The first step is to process the SDoc files into a logical structure. This is th
 
        process_file = fn[filename, text][let[snippets = parse_sdoc(text)] in (parse_prelude(snippets[0]),
                                                                               map(mark_section, snippets), map(mark_pipe, snippets), map(index, snippets), fold_subsections(result, snippets, 0),
-                                                                              merge_indexes(result), where[result = {section: filename, index: {}, level: 0, text: ''}])],
+                                                                              merge_indexes(result), where[result = {snippets: snippets, section: filename, index: {}, level: 0, text: ''}])],
 
 Rendering.
 Once files have been broken down into hierarchical sections, we can render them as HTML. This is fairly straightforward; most of the markup is derived directly from the structure of the
@@ -134,41 +134,41 @@ snippets. Later on I'll put in some code to actually process the text and insert
          render_toc = fn[s][s.section && $('<a href="##{s.section}">').snippet(s).append($('<li>').text(s.section).append($('<ul>').append(map(render_toc, s.subsnippets || []))))],
 
         escape_html = fn[s][s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')],
-           html_for = fn[s][tag_words(escape_html(outdent(s.text || '')), s.index || {})],
-     render_snippet = fn[s][s.section ? $('<section id="#{s.section}">').snippet(s).append($('<h#{s.level + 1}>').text(s.section)).append(
-                                          $('<div>').append($('<p>').html(html_for(s))).append(map(render_snippet, s.subsnippets || []))) :
-                     s.role === 'pre' ? $('<pre>').snippet(s).html(html_for(s)) :
-                  s.role === 'source' ? $('<pre class="source">').snippet(s).html(html_for(s)) :
-                 s.role === 'prelude' ? $('<header>').append($('<h2 class="name">').text(s.name)).append($('<h3 class="author">').append(s.author)).append($('<p>').html(html_for(s))) :
-               s.role === 'enumerate' ? $('<ol start="#{s.start}">').snippet(s).append(map(fn[s][$('<li>').snippet(s).text(s)], s.items)) :
-                                        $('<p>').snippet(s).html(html_for(s))],
+           html_for = fn[s, index][tag_words(escape_html(outdent(s.text || '')), index || s.index || {})],
+     render_snippet = fn[index][fn[s][s.section ? $('<section id="#{s.section}">').snippet(s).append($('<h#{s.level + 1}>').text(s.section)).append(
+                                                    $('<div>').append($('<p>').html(html_for(s, index))).append(map(render_snippet(index), s.subsnippets || []))) :
+                               s.role === 'pre' ? $('<pre>').snippet(s).html(html_for(s, index)) :
+                            s.role === 'source' ? $('<pre class="source">').snippet(s).html(html_for(s, index)) :
+                           s.role === 'prelude' ? $('<header>').append($('<h2 class="name">').text(s.name)).append($('<h3 class="author">').append(s.author)).append($('<p>').html(html_for(s, index))) :
+                         s.role === 'enumerate' ? $('<ol start="#{s.start}">').snippet(s).append(map(fn[s][$('<li>').snippet(s).text(s)], s.items)) :
+                                                  $('<p>').snippet(s).html(html_for(s, index))]],
 
   Word tagging.
-  Each searchable term in the document is tagged, which implementation-wise means that it is wrapped in an <a class='tag'> whose href is the term to be searched for. These hrefs can be used
-  normally by the browser, since #/x hashtags search for x. However, we don't tag words that appear almost ubiquitously. We tag only the terms that would actually be useful to search for (i.e.
-  the ones that occur somewhat rarely, in this case the 0-25% percentile of terms by relevance).
+  Each searchable term in a source snippet is tagged, which implementation-wise means that it is wrapped in an <a class='tag'> whose href is the term to be searched for. These hrefs can be
+  used normally by the browser, since #/x hashtags search for x.
 
-     build_excluded = function (s) {var least = 1.0e10, most = 0;  for (var k in s.index) s.index[k] > most && (most = s.index[k]), s.index[k] < least && (least = s.index[k]);
-                                    var half  = most - least >> 2; for (var k in s.index) s.index[k] > half && (words_to_exclude[k] = true)},
+       words_to_tag = function (snippets) {for (var i = 0, r = {}, l = snippets.length, s; s = snippets[i], i < l; ++i) s.role === 'source' && $.extend(r, s.index || {}); return r},
 
-   words_to_exclude = {},
-          tag_words = function (html, index) {for (var i = 0, ws = html.split(/(\W+)/), l = ws.length, w; w = ws[i], i < l; i += 2)
-                                                if (w in index && ! (w in words_to_exclude)) ws[i] = '<a class="tag" href="#/#{w}">#{w}</a>';
+          tag_words = function (html, index) {for (var i = 0, ws = html.split(/(\W+)/), l = ws.length, w; w = ws[i], i < l; i += 2) if (w in index) ws[i] = '<a class="tag" href="#/#{w}">#{w}</a>';
                                               return ws.join('')},
 
-             render = fn[filename, source][let[parsed = process_file(filename, source)] in (build_excluded(parsed),
-                                                                                            $(fn_[$('#source').append(render_snippet(parsed)), $('#toc > ul').append(render_toc(parsed))]))];
+             render = fn[filename, source][let[parsed = process_file(filename, source)] in $(fn_[$('#source').append(render_snippet(words_to_tag(parsed.snippets))(parsed)),
+                                                                                                 $('#toc > ul').append(render_toc(parsed))])];
+
+  Search box processing.
+  Handles the word highlighting (on a matching search) and the document/TOC truncation to the matching snippets.
 
   $(fn_[$(document).keypress(fn[e][document.activeElement !== $('#search input')[0] && e.which === '/'.charCodeAt(0) ? ($('#search input').select().focus(), e.preventDefault()) : true]),
         $('body').append($('<div id="source">')).append($('<div id="toc"><ul>')).append($('<div id="search">').append($('<input>').
                     bind('keyup change', let[timeout = null] in
-                                         fn_[let[v = $(this).val().replace(/\s+/g, ':')] in
+                                         fn_[let[ws = $(this).val() && $(this).val().split(/\W+/)] in
                                              (document.location.hash = '#/#{$(this).val()}',
                                               timeout && clearTimeout(timeout),
-                                              timeout = setTimeout(fn_[v.length ? ($('.snippet').each(fn_[let[i = $(this).snippet().index] in (i && i[v] ? $(this).appear() : $(this).disappear())]),
-                                                                                   $('a.highlighted').removeClass('highlighted'),
-                                                                                   $('a.tag[href="#/#{v}"]').addClass('highlighted')):
-                                                                                  ($('.snippet').appear(), $('a.highlighted').removeClass('highlighted'))], 200))]))),
+                                              timeout = setTimeout(fn_[ws && ws.length ?
+                                                ($('.snippet').each(fn_[let[i = $(this).snippet().index] in (i && i[ws.join(':')] ? $(this).appear() : $(this).disappear())]),
+                                                 $('a.highlighted').removeClass('highlighted'),
+                                                 map(fn[w][$('a.tag[href="#/#{w}"]').addClass('highlighted')], ws)) :
+                                                ($('.snippet').appear(), $('a.highlighted').removeClass('highlighted'))], 200))]))),
         $('#search input').focus()]);
 
   $.fn.snippet = fn[s][s ? this.data('snippet', s).addClass('snippet').addClass('role-#{s.role}') : this.data('snippet')];

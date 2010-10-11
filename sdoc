@@ -44,6 +44,7 @@ sub generate_source {
   if ($sdocp) {
     # Generate an SDocP file, which is similar to JSONP but the callback takes a string of SDoc.
     # SDocP always uses the 'sdocp()' callback.
+    $filename =~ s/^\.\///;     # Remove ./ on the beginning, if it's there
     my $contents         = escape read_file $filename;
     my $escaped_filename = escape $filename;
     write_file "${filename}p", "sdocp('$escaped_filename', '$contents');";

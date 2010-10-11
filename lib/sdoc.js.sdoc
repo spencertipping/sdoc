@@ -152,14 +152,18 @@ snippets. Later on I'll put in some code to actually process the text and insert
           tag_words = function (html, index) {for (var i = 0, ws = html.split(/(\W+)/), l = ws.length, w; w = ws[i], i < l; i += 2) if (w in index) ws[i] = '<a class="tag" href="#/#{w}">#{w}</a>';
                                               return ws.join('')},
 
-             render = fn[filename, source][let[parsed = process_file(filename, source)] in $(fn_[$('#source').append(render_snippet(words_to_tag(parsed.snippets))(parsed)),
-                                                                                                 $('#toc > ul').append(render_toc(parsed))])];
+     index_of_words = function (index) {var ws = []; for (var k in index) /:/.test(k) || ws.push(k); return map(fn[w]['<a href="#/#{w}"><li>#{w}</li></a>'], ws.sort())},
+
+             render = fn[filename, source][let[parsed = process_file(filename, source)] in $(fn_[let[ws = words_to_tag(parsed.snippets)] in
+                                                                                                 ($('#source').append(render_snippet(ws)(parsed)),
+                                                                                                  $('#index > ul').append(index_of_words(ws).join('')),
+                                                                                                  $('#toc > ul').append(render_toc(parsed)))])];
 
   Search box processing.
   Handles the word highlighting (on a matching search) and the document/TOC truncation to the matching snippets.
 
   $(fn_[$(document).keypress(fn[e][document.activeElement !== $('#search input')[0] && e.which === '/'.charCodeAt(0) ? ($('#search input').select().focus(), e.preventDefault()) : true]),
-        $('body').append($('<div id="source">')).append($('<div id="toc"><ul>')).append($('<div id="search">').append($('<input>').
+        $('body').append($('<div id="source">')).append($('<div id="toc"><ul>')).append($('<div id="index"><ul>')).append($('<div id="search">').append($('<input>').
                     bind('keyup change', let[timeout = null] in
                                          fn_[let[ws = $(this).val() && $(this).val().split(/\W+/)] in
                                              (document.location.hash = '#/#{$(this).val()}',

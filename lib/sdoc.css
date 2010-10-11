@@ -18,8 +18,15 @@ li {margin-bottom: 0.44em}
 #toc ul li {padding: 4px 0 0 0; margin: 0}
 #toc ul a:hover {color: black}
 #toc ul a:hover > li {color: black}
-#toc a {color: #888; text-decoration: none}
+#toc a {text-decoration: none}
 #toc:hover a {color: #888}
+
+#index {width: 200px; font-size: 9pt; color: #ccc; overflow: hidden}
+#index ul {list-style: square; padding: 0 2px 0 10px; margin: 0; border-right: solid 1px #eee}
+#index ul li {padding: 4px 0 0 0; margin: 0}
+#index a {color: #ccc; text-decoration: none}
+#index:hover a {color: #888}
+#index a:hover {color: black}
 
 #search {position: fixed; top: 0; right: 0}
 #search input {float: right; background: transparent; font-family: 'Droid Sans Mono'; font-size: 14pt; border: solid 1px #ddd; border-width: 0 0 0 1px; color: #888}

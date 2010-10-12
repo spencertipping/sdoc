@@ -1,12 +1,10 @@
 SDoc JavaScript driver | Spencer Tipping
 Licensed under the terms of the MIT source code license
 
-var sdocp = caterwaul.clone('std')(function () {
-
 Introduction.
-This driver file governs the process of rendering SDoc source as HTML. The mechanism to achieve this is fairly simple: First, the you download the sdoc.html file from this directory (hosted at
-http://spencertipping.com/sdoc/sdoc.html). The HTML file contains instructions for creating a new project; basically, it involves running 'sdoc -p' and then creating <script> tags to refer to
-the SDocP files.
+This driver file governs the process of rendering SDoc source as HTML (if you have no idea what SDoc is or why you should use it, then see 'What SDoc is and why you should use it', below). The
+mechanism to achieve this is fairly simple: First, the you download the sdoc.html file from this directory (hosted at http://spencertipping.com/sdoc/sdoc.html). The HTML file contains
+instructions for creating a new project; basically, it involves running 'sdoc -p' and then creating <script> tags to refer to the SDocP files.
 
 The goal of this project isn't to produce immaculate or even particularly well-formatted documentation. Nor is it designed to be flexible. Rather, it's (1) to encourage developers (especially
 me) to write well-documented code by making documentation trivial to write, and (2) to provide utility to anyone learning the codebase. SDoc in general is geared towards solving (1), and this
@@ -16,10 +14,123 @@ HTML driver is designed to solve (2). There are several things it does to help:
   2. Indexing. Each word in the code is fully searchable and indexed; it is very easy to find other occurrences of the word and search for particular usage patterns.
   3. Looking cool. The spiffier the interface looks, the more likely developers are to spend time documenting things :)
 
-  Process.
-  Internally, a couple of things need to happen. First, we need to know when all of the scripts have been loaded. This is easily achieved by comparing the original list of <script>s in the
-  body to the files provided in the sdocp callbacks. Once we have each file we can start parsing, sectioning, and building indexes. (And if after some time we don't have all of the files then
-  we can display a warning to the user.)
+What SDoc is and why you should use it.
+SDoc stands for 'Simple Documentation', and that's what it tries to be. It's two things. It's a format for writing code (more about the comments than the code, really), and it's a small set of
+tools to (1) transform this format into regular code, and (2) make cool-looking HTML pages out of your source (like this one, in fact). SDoc is also designed to be more fun to write than
+normal code is; it makes writing comments much easier, and it also provides a really easy way to create sections and cross-references.
+
+  What SDoc code looks like.
+  Imagine your code, but with no comment markers at all. That's basically what SDoc looks like. For example, consider this regular Java code (ignore the vertical bars on the left):
+
+  | | // Foo.java
+    | // Written by Edsger Dijkstra
+    | // GPL
+    |
+    | /** The Foo class prints 'hello world' to the screen.
+    |   * Because of the immense complexity of this class,
+    |   * it requires a dissertation-length paragraph of
+    |   * documentation....
+    |   *
+    |   * And a second paragraph too, in fact.... */
+    | public class Foo {
+    |   /** The main() method actually does the work.
+    |     * It should run in constant-time, but who really
+    |     * cares anyway -- I mean, it's a hello world
+    |     * program -- like seriously. */
+    |   public static void main(final String[] args) {
+    |     System.out.println("hello world");
+    |   }
+    | }
+
+  Here's how to format it in SDoc:
+
+  | | Foo | Edsger Dijkstra
+    | GPL
+    |
+    | The Foo class.
+    | Prints 'hello world' to the screen. Because of
+    | the immense complexity of this class, it requires
+    | a dissertation-length paragraph of documentation...
+    |
+    | And a second paragraph too, in fact....
+    |
+    | public class Foo {
+    | 
+    |   The main() method.
+    |   Actually does the work. It should run in
+    |   constant-time, but who really cares anyway --
+    |   I mean, it's a hello world program -- like
+    |   seriously.
+    |
+    |   public static void main(final String[] args) {
+    |     System.out.println("hello world");
+    |   }
+    | }
+
+  When you run the sdoc tool, it automatically converts your SDoc-formatted source into regular code. It uses a simple heuristic to figure out which lines are comments. It splits your document
+  into paragraphs (where paragraphs are separated by blank lines), and paragraphs starting with a capital letter or pipe symbol (|) are comments. The others are code. SDoc knows how to comment
+  over 30 languages based on their file extension, and will comment out the appropriate paragraphs automatically. Code paragraphs are left alone and printed verbatim, and all line numbers are
+  preserved.
+
+  In addition to commenting things out, SDoc provides an HTML page of your source. It infers section headings by looking for paragraphs that start with short lines ending in a period. (For
+  example, the 'Foo' and 'main()' paragraphs in the example above each start a section. A 'short line' is one that is at least ten characters shorter than the one after it.) It also determines
+  the section level of those headings; this is inferred from the indentation. Each level uses two spaces of indentation (and SDoc is not smart about tabs); so, for example, the sections in the
+  above code would be:
+
+  | - The Foo class
+      - The main() method
+
+  Paragraphs starting with a pipe symbol are treated specially. If they start with a number, a period, and some spaces, then they are considered to be a numbered list; for example, this SDoc:
+
+  | | 1. Foo
+    | 2. Bar
+
+  Produces this HTML:
+
+  | 1. Foo
+    2. Bar
+
+  If a pipe paragraph doesn't look like a numbered list, then it's treated as either ASCII art or a code example (both render the same way).
+
+  Formatting.
+  SDoc doesn't and never will provide ways to format things. This includes:
+
+  | 1. Boldface text
+    2. Italic text
+    3. Monospace text
+    4. Links that don't start with http:// and look like links
+    5. Colors
+    6. The <blink> tag
+
+  The reason for this is that formatters often get things wrong. I was actually on the fence about providing numbered lists, but they look enough better as HTML and are accurately-recognized
+  enough that I was willing to go for it. But the whole idea behind SDoc is that you should never think about the fact that you're writing documentation, or have to remember how to do it. It
+  should be completely natural, and as easy as typing out an idea while you're thinking out loud, to write good documentation that produces well-organized code and good-looking HTML.
+
+Using SDoc.
+There are two things you need to do to use SDoc. First, you should obtain a copy of SDoc (available at http://github.com/spencertipping/sdoc), and as part of this process put the 'sdoc' script
+somewhere in your $PATH and put the contents of the 'vim' directory in your '~/.vim'. (This enables vim syntax highlighting -- sorry, no emacs support yet.)
+
+  The SDoc script and sdoc.html.
+  Here's an example development session with SDoc:
+
+  | $ vim Foo.java.sdoc         # hack away
+    $ sdoc                      # generate Foo.java (it processes all .sdoc files in the current directory)
+    $
+
+  That's it. Now you have Foo.java, and you can compile it normally. If you also want HTML documentation, then you'd do this instead (or in addition, it doesn't matter):
+
+  | $ vim Foo.java.sdoc         # hack away
+    $ sdoc -p                   # generate Foo.java and Foo.java.sdocp, which is used for the HTML interface
+    $ wget http://spencertipping.com/sdoc/sdoc.html
+    $ vim sdoc.html             # follow the included instructions to create your HTML file
+    $
+
+  Then you can navigate to sdoc.html and you should have a working, searchable page of documentation. (Probably doesn't work in IE, and probably never will.)
+
+Internals of the conversion process.
+Everything from here down is just documentation for the JS driver that does the conversion. It contains no useful information about how to use SDoc.
+
+var sdocp = caterwaul.clone('std')(function () {
 
   JQuery extensions.
   We need a couple of things. First, jQuery needs to be able to append an array of elements to something, so we pluralize append() below. Next, we need a nice animation to use for showing and

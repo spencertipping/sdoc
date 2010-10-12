@@ -260,7 +260,7 @@ snippets. Later on I'll put in some code to actually process the text and insert
 
        words_to_tag = function (snippets) {for (var i = 0, r = {}, l = snippets.length, s; s = snippets[i], i < l; ++i) s.role === 'source' && $.extend(r, s.index || {}); return r},
 
-          tag_words = function (html, index) {for (var i = 0, ws = html.split(/(\s*&\w+;|\W+)/), l = ws.length, w; w = ws[i], i < l; i += 2)
+          tag_words = function (html, index) {for (var i = 0, ws = html.split(/(\W*&\w+;\W*|\W+)/), l = ws.length, w; w = ws[i], i < l; i += 2)
                                                 if (Object.hasOwnProperty.call(index, w)) ws[i] = '<a class="tag" href="#/#{w}">#{w}</a>';
                                               return ws.join('')},
 

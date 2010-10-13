@@ -245,14 +245,30 @@ snippets. Later on I'll put in some code to actually process the text and insert
          render_toc = fn[s][s.section && $('<a href="##{s.section}">').snippet(s).append($('<li>').text(s.section).append($('<ul>').append(map(render_toc, s.subsnippets || []))))],
 
         escape_html = fn[s][s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')],
-           html_for = fn[s, index][tag_words(escape_html(outdent(s.text || '')), index || s.index || {})],
-     render_snippet = fn[index][fn[s][s.section ? $('<section id="#{s.section}">').snippet(s).append($('<h#{s.level + 1}>').text(s.section)).append(
-                                                    $('<div>').append($('<p>').html(html_for(s, index))).append(map(render_snippet(index), s.subsnippets || []))) :
-                               s.role === 'pre' ? $('<pre>').snippet(s).html(html_for(s, index)) :
-                            s.role === 'source' ? $('<pre class="source">').snippet(s).html(html_for(s, index)) :
-                           s.role === 'prelude' ? $('<header>').append($('<h2 class="name">').text(s.name)).append($('<h3 class="author">').append(s.author)).append($('<p>').html(html_for(s, index))) :
-                         s.role === 'enumerate' ? $('<ol start="#{s.start}">').snippet(s).append(map(fn[s][$('<li>').snippet(s).text(s)], s.items)) :
-                                                  $('<p>').snippet(s).html(html_for(s, index))]],
+      unescape_html = fn[s][s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')],
+
+           html_for = fn[s, root][tag_words(cross_reference(detect_links(escape_html(outdent(s.text || ''))), root), root && root.index || s.index || {})],
+     render_snippet = fn[root][fn[s][s.section ? $('<section id="#{s.section}">').snippet(s).append($('<h#{s.level + 1}>').text(s.section)).append(
+                                                   $('<div>').append($('<p>').html(html_for(s, root))).append(map(render_snippet(root), s.subsnippets || []))) :
+                              s.role === 'pre' ? $('<pre>').snippet(s).html(html_for(s, root)) :
+                           s.role === 'source' ? $('<pre class="source">').snippet(s).html(html_for(s, root)) :
+                          s.role === 'prelude' ? $('<header>').append($('<h2 class="name">').text(s.name)).append($('<h3 class="author">').append(s.author)).append($('<p>').html(html_for(s, root))) :
+                        s.role === 'enumerate' ? $('<ol start="#{s.start}">').snippet(s).append(map(fn[s][$('<li>').snippet(s).text(s)], s.items)) :
+                                                 $('<p>').snippet(s).html(html_for(s, root))]],
+
+  Cross-referencing.
+  If you put a section name into single or double quotes, like this: "Cross-referencing", then it will become a link to that section. It's case-sensitive, but other than that has no particular
+  oddities.
+
+    cross_reference = function (html, root) {for (var i = 0, l = root.snippets.length, s; s = root.snippets[i] && root.snippets[i].section, i < l; ++i)
+                                               s && (html = html.split('"#{s}"').join('<a href="##{s}" class="cross-reference">#{s}</a>').
+                                                                 split("'#{s}'").join('<a href="##{s}" class="cross-reference">#{s}</a>'));
+                                             return html},
+
+  Hyperlink detection.
+  Anything that looks like a hyperlink, minus trailing punctuation, will be turned into a proper link that opens in a new window.
+
+       detect_links = fn[escaped_html][escaped_html.replace(/\w+:\/\/(?:[^\s\w]*\w)+/g, fn[s]['<a class="link" href="#{unescape_html(s)}" target="_blank">#{s}</a>'])],
 
   Word tagging.
   Each searchable term in a source snippet is tagged, which implementation-wise means that it is wrapped in an <a class='tag'> whose href is the term to be searched for. These hrefs can be
@@ -260,14 +276,14 @@ snippets. Later on I'll put in some code to actually process the text and insert
 
        words_to_tag = function (snippets) {for (var i = 0, r = {}, l = snippets.length, s; s = snippets[i], i < l; ++i) s.role === 'source' && $.extend(r, s.index || {}); return r},
 
-          tag_words = function (html, index) {for (var i = 0, ws = html.split(/(\W*&\w+;\W*|\W+)/), l = ws.length, w; w = ws[i], i < l; i += 2)
+          tag_words = function (html, index) {for (var i = 0, ws = html.split(/(\W*&\w+;\W*|\W*<a.*?<\/a>|\W*<\/?\w+[^>]*>|\W+)/i), l = ws.length, w; w = ws[i], i < l; i += 2)
                                                 if (Object.hasOwnProperty.call(index, w)) ws[i] = '<a class="tag" href="#/#{w}">#{w}</a>';
                                               return ws.join('')},
 
      index_of_words = function (index) {var ws = []; for (var k in index) /:/.test(k) || ws.push(k); return map(fn[w]['<a href="#/#{w}"><li>#{w}</li></a>'], ws.sort())},
 
              render = fn[filename, source][let[parsed = process_file(filename, source)] in $(fn_[let[ws = words_to_tag(parsed.snippets)] in
-                                                                                                 ($('#source').append(render_snippet(ws)(parsed)),
+                                                                                                 ($('#source').append(render_snippet(parsed)(parsed)),
                                                                                                   $('#index > ul').append(index_of_words(ws).join('')),
                                                                                                   $('#toc > ul').append(render_toc(parsed)))])];
 

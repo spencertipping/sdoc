@@ -39,3 +39,7 @@ li {margin-bottom: 0.44em}
 #source a.tag {text-decoration: none; color: inherit}
 #source a.tag:hover {color: #35a}
 #source a.highlighted {color: #35a}
+#source a.cross-reference {color: #888; text-decoration: none}
+#source a.cross-reference:hover {color: #35a}
+#source a.link {color: #888; text-decoration: none}
+#source a.link:hover {color: #080}

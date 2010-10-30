@@ -47,7 +47,7 @@ sub generate_source {
     $filename =~ s/^\.\///;     # Remove ./ on the beginning, if it's there
     my $contents         = escape read_file $filename;
     my $escaped_filename = escape $filename;
-    write_file "${filename}p", "sdocp('$escaped_filename', '$contents');";
+    write_file "${filename}p", "sdocp('$escaped_filename', '$contents');" unless -d $filename;
   }
 }
 

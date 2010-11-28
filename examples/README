@@ -1,3 +1,2 @@
 If you run sdoc in this directory, it will produce the source from these examples.
-You can produce documentation by running sdoch. This will produce an HTML file for
-each source file.
+You can enable sdoc.html by running sdoc -p.

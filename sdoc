@@ -25,6 +25,8 @@ sub is_code    {map /^\s*[^A-Z\|\s]/o, @_}
 sub is_blank   {map /^\n/o, @_}
 sub comment    {my ($text, $s, $e) = @_; join "\n", map("$s $_$e", split /\n/, $text)}
 
+sub backup     {warn "$_[0] is writable, so I'm backing it up as $_[0].orig rather than overwriting it (if you haven't made changes, you can delete $_[0].orig)" and rename $_[0], "$_[0].orig"}
+
 sub paragraphs {map split(/(\n{2,})/, $_), @_}
 sub read_file  {open my $fh, '<', $_[0]; my $result = join '', <$fh>; close $fh; $result}
 sub write_file {chmod 0644, $_[0]; open my $fh, '>', $_[0]; print $fh $_[1]; close $fh; chmod 0444, $_[0]}
@@ -37,7 +39,7 @@ sub generate_source {
   my ($new_file)    = $filename =~ /^(.*)\.sdoc$/igo;
   my ($start, $end) = split /,/o, $comment || $comments_for_extension{lc $extension};
 
-  warn "Not clobbering $new_file" and return if -f $new_file && (! read_file($new_file) =~ /\s$generated_string\s/ || -w $new_file);
+  backup $new_file if -f $new_file && (! read_file($new_file) =~ /\s$generated_string\s/ || -w $new_file);
   write_file $new_file, join '', map(is_code($_) || is_blank($_) ? ($_ =~ /^\s*c\n(.*)$/so ? $1 : $_) : comment($_, $start, $end), paragraphs read_file $filename),
                                  "\n$start $generated_string $end\n";
   chmod 0555, $new_file if read_file($filename) =~ /^#!/mo;

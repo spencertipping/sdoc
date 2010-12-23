@@ -14,13 +14,15 @@ fun SDocSetup()
   syn case match
   syn sync linebreaks=5
 
-  syn region sdBlockComment start=/\(^$\n^\|\%^\)\s*[A-Z\|]/ end=/^$\|\%$/ contains=sdCoerceSDoc,sdNumberedList keepend
+  syn region sdBlockComment start=/\(^$\n^\|\%^\)\s*[A-Z\|]/ end=/^$\|\%$/ contains=sdCoerceSDoc,sdNumberedList,sdHeading keepend
+  syn match  sdHeading      /\(^$\n^\|\%^\)\s*[A-Z].\{,60\}\.$/ contained
   syn match  sdCoerceCode   /^\s*c$/
   syn match  sdCoerceSDoc   /^\s*|\(\s\|$\)/ contained
   syn region sdNumberedList start=/^\s*|\s*\d\{1,2\}\.\s\{1,2\}[A-Za-z]/me=e-1 end=/^$\|\%$/ contains=sdNumberedItem transparent
   syn match  sdNumberedItem /^\s*|\?\s*\d\{1,2\}\.\s\{1,2\}/ contained
 
   hi link sdBlockComment Comment
+  hi link sdHeading      PreProc
   hi link sdCoerceCode   PreProc
   hi link sdCoerceSDoc   PreProc
   hi link sdNumberedItem PreProc

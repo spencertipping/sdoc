@@ -12,7 +12,7 @@ fun SDocSetup()
 
   " Add in custom syntax elements
   syn case match
-  syn sync fromstart
+  syn sync minlines=10
 
   syn region sdBlockComment start=/\(^$\n^\|\%^\)\s*[A-Z\|]/ end=/^$\|\%$/ contains=sdCoerceSDoc,sdNumberedList,sdHeading keepend
   syn match  sdHeading      /\(^$\n^\|\%^\)\s*[A-Z].\{,60\}\.$/ contained

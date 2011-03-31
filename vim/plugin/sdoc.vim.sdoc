@@ -21,11 +21,14 @@ fun SDocSetup()
   syn region sdNumberedList start=/^\s*|\s*\d\{1,2\}\.\s\{1,2\}[A-Za-z]/me=e-1 end=/^$\|\%$/ contains=sdNumberedItem transparent
   syn match  sdNumberedItem /^\s*|\?\s*\d\{1,2\}\.\s\{1,2\}/ contained
 
+  syn match  sdPreprocessor /^\s*-\s\+\w+.*$/
+
   hi link sdBlockComment Comment
   hi link sdHeading      PreProc
   hi link sdCoerceCode   PreProc
   hi link sdCoerceSDoc   PreProc
   hi link sdNumberedItem PreProc
+  hi link sdPreprocessor Special
 endfun
 
 augroup sdoc

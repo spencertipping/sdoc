@@ -2,11 +2,11 @@
 @import url(http://fonts.googleapis.com/css?family=Droid%20Sans%20Mono&subset=latin);
 
 body {font-family: 'Droid Sans', sans-serif; font-size: 9pt; width: 900px; margin-left: auto; margin-right: auto}
-h1, h2, h3, h4, h5, h6 {color: black; padding-left: 10px; font-family: 'Droid Sans', sans-serif}
-p {margin-left: 10px; text-align: justify; line-height: 1.44em}
-pre {font-family: 'Droid Sans Mono'; letter-spacing: -0.07em; color: #444; font-size: 8pt; border: solid 1px #ccc; border-width: 0 0 0 1px; padding: 4px 0 4px 9px}
+h1, h2, h3, h4, h5, h6 {color: black; padding-left: 20px; font-family: 'Droid Sans', sans-serif}
+p {margin-left: 20px; text-align: justify; line-height: 1.44em}
+pre {font-family: 'Droid Sans Mono'; letter-spacing: -0.07em; color: #444; font-size: 8pt; border: solid 1px #ccc; border-width: 0 0 0 1px; padding: 4px 0 4px 19px}
 pre.source {color: black; border-color: #999}
-pre:hover {z-index: 1; border-width: 1px 0 1px 1px; position: relative; width: 200%; background: #eee; padding: 3px 0 3px 9px}
+pre:hover {z-index: 1; border-width: 1px 0 1px 1px; position: relative; width: 200%; background: #eee; padding: 3px 0 3px 19px}
 section {margin-bottom: 10px}
 
 li {margin-bottom: 0.44em}

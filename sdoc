@@ -27,7 +27,7 @@ sub comment    {my ($text, $s, $e) = @_; join "\n", map("$s $_$e", split /\n/, $
 
 sub backup     {warn "$_[0] is writable, so I'm backing it up as $_[0].orig rather than overwriting it (if you haven't made changes, you can delete $_[0].orig)" and rename $_[0], "$_[0].orig"}
 
-sub paragraphs {map split(/(\n{2,})/, $_), @_}
+sub paragraphs {map split(/((?:\n\h*){2,})/, $_), @_}
 sub read_file  {open my $fh, '<', $_[0]; my $result = join '', <$fh>; close $fh; $result}
 sub write_file {chmod 0644, $_[0]; open my $fh, '>', $_[0]; print $fh $_[1]; close $fh; chmod 0444, $_[0]}
 

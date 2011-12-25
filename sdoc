@@ -37,7 +37,7 @@ sub generate_source {
   my ($filename)    = @_;
   my ($extension)   = $filename =~ /\.(\w+)\.sdoc$/igo;
   my ($new_file)    = $filename =~ /^(.*)\.sdoc$/igo;
-  my ($start, $end) = split /,/o, $comment || $comments_for_extension{lc $extension};
+  my ($start, $end) = split /,/o, $comment || $comments_for_extension{lc $extension} || '#';
 
   backup $new_file if -f $new_file && (! read_file($new_file) =~ /\s$generated_string\s/ || -w $new_file);
   write_file $new_file, join '', map(is_code($_) || is_blank($_) ? ($_ =~ /^\s*c\n(.*)$/so ? $1 : $_) : comment($_, $start, $end), paragraphs read_file $filename),

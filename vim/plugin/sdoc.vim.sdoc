@@ -14,7 +14,7 @@ fun SDocSetup()
   syn case match
   syn sync minlines=5
 
-  syn region sdBlockComment start=/\(^$\n^\|\%^\)\s*[A-Z\|]/ end=/^\s*$\|\%$/ contains=sdCoerceSDoc,sdNumberedList,sdHeading keepend
+  syn region sdBlockComment start=/\(^$\n^\|\%^\)\s*[A-Z\|]/ end=/^\s*$\|\%$/ contains=sdCoerceSDoc,sdNumberedList,sdHeading containedin=ALL keepend
   syn match  sdHeading      /\(^$\n^\|\%^\)\s*[A-Z].\{,60\}\.$/ contained
   syn match  sdCoerceCode   /^\s*c$/
   syn match  sdCoerceSDoc   /^\s*|\(\s\|$\)/ contained

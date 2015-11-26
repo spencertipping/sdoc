@@ -23,12 +23,28 @@ fun SDocSetup()
 
   syn match  sdPreprocessor /^\s*-\s\+\w\+/
 
+  syn match  sdTodoFn /^\s*-\s\+fn\s/
+  syn match  sdTodoFt /^\s*-\s\+ft\s/
+  syn match  sdTodoIp /^\s*-\s\+ip\s/
+  syn match  sdTodoNb /^\s*-\s\+nb\s/
+  syn match  sdTodoTh /^\s*-\s\+th\s/
+  syn match  sdTodoTd /^\s*-\s\+td\s/
+  syn match  sdTodoPo /^\s*-\s\+po\s/
+
   hi link sdBlockComment Comment
   hi link sdHeading      PreProc
   hi link sdCoerceCode   PreProc
   hi link sdCoerceSDoc   PreProc
   hi link sdNumberedItem PreProc
   hi link sdPreprocessor Special
+
+  hi link sdTodoFn Type
+  hi link sdTodoFt Identifier
+  hi link sdTodoIp Keyword
+  hi link sdTodoNb Comment
+  hi link sdTodoTh Special
+  hi link sdTodoTd Special
+  hi link sdTodoPo Special
 endfun
 
 augroup sdoc

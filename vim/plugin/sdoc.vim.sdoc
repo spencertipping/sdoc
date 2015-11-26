@@ -23,7 +23,7 @@ fun SDocSetup()
 
   syn match  sdPreprocessor /^\s*-\s\+\w\+/
 
-  syn match  sdTodoFn /^\s*-\s\+fn\s/
+  syn match  sdTodoFn /^\s*-\s\+fn\s.*$/
   syn match  sdTodoFt /^\s*-\s\+ft\s/
   syn match  sdTodoIp /^\s*-\s\+ip\s/
   syn match  sdTodoNb /^\s*-\s\+nb\s/
